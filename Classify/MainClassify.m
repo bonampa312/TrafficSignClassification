@@ -1,5 +1,5 @@
 % Importar una imagen seleccionada por el usuario
-[filename, pathname]=uigetfile({'*.jpg';'*.ppm';'*.png';'*.jpeg'},'Select An Image');
+[filename, pathname]=uigetfile({'*.jpg;*.ppm;*.png;*.jpeg'},'Select An Image');
 % Obtener la ruta absoluta de la imagen
 fullPath = strcat(pathname,filename);
 % Importar la imagen como una variable
@@ -53,5 +53,5 @@ Xtest = (Xtest-repmat(mu,size(Xtest,1),1))./repmat(sigma,size(Xtest,1),1);
 [classification] = classify(Xtest, Xtrain, Ytrain, 'linear');
 
 % Se selecciona el nombre de la muestra segï¿½n la clasificaciï¿½n hecha
-text = ['La seï¿½al de trï¿½nsito es: '+labels(classification)];
+text = ['El señal es ',labels{classification}];
 disp(text);
