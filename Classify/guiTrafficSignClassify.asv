@@ -113,10 +113,7 @@ Xtest = (handles.Xtest-repmat(mu,size(handles.Xtest,1),1))./repmat(sigma,size(ha
 text = ['La señal de tránsito es: ',handles.labels{classification}];
 set(handles.classifyText,'String',text);
 disp(text);
-text2 = ['./SampleSigns/',num2str(classification),'.png'];
-img2 = imread(text2);
-axes(handles.result_img);
-imshow(img2);
+img2 = imread('./SampleSigns/'+
 toc;
 
 
