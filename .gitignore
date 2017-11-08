@@ -1,2 +1,7 @@
-/Classify/VectorPropio.mat
+/Classify/vectorPropio.mat
 /Classify/HOGFeatures.mat
+/GMMnPCA/vectorPropio.mat
+/GMMnPCA/HOGFeatures.mat
+/HOG/vectorPropio.mat
+/HOG/HOGFeatures.mat
+/HOG/Database

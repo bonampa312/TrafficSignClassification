@@ -8,6 +8,5 @@ while true
 end
 for val = folders
     fold = val{1};
-    
-    tok = val{1}(end-1:end)
+    tok = val{1}(end-1:end);
 end
