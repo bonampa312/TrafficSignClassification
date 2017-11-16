@@ -2,6 +2,7 @@ clear all, close all, clc
 caracteristicas = [];
 clases = [];
 carpetas = readFolders(pwd);
+tic
 for fold = carpetas
     folder = strcat(fold{1},'\');
     ext = str2num(fold{1}(end-1:end));
@@ -17,3 +18,4 @@ for fold = carpetas
 %       figure;imshow(img);hold on;plot(fig);
     end
 end
+toc

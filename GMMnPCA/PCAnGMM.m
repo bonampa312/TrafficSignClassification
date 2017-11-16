@@ -14,6 +14,7 @@ particion=cvpartition(NumMuestras,'Kfold',Rept);
 
 NumClases=length(unique(Y)); %%% Se determina el n�mero de clases del problema.
 indexes = [];
+tic
 for fold=1:Rept
     %%% Se hace la partici�n de las muestras %%%
     %%%      de entrenamiento y prueba       %%%
@@ -62,5 +63,6 @@ Eficiencia = mean(EficienciaTest);
 IC = std(EficienciaTest);
 Texto=['La eficiencia obtenida fue = ', num2str(Eficiencia),' +- ',num2str(IC)];
 disp(Texto);
+toc
 %end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

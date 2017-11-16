@@ -1,24 +1,34 @@
 function varargout = guiTrafficSignClassify(varargin)
-% GUITRAFFICSIGNCLASSIFY MATLAB code for guiTrafficSignClassify.fig
-%      GUITRAFFICSIGNCLASSIFY, by itself, creates a new GUITRAFFICSIGNCLASSIFY or raises the existing
-%      singleton*.
 %
-%      H = GUITRAFFICSIGNCLASSIFY returns the handle to a new GUITRAFFICSIGNCLASSIFY or the handle to
-%      the existing singleton*.
+%   Description for Matlab GUI implemented in guiTrafficSignClassify:
 %
-%      GUITRAFFICSIGNCLASSIFY('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in GUITRAFFICSIGNCLASSIFY.M with the given input arguments.
+%       GUITRAFFICSIGNCLASSIFY MATLAB code for guiTrafficSignClassify.fig
+%           GUITRAFFICSIGNCLASSIFY, by itself, creates a new GUITRAFFICSIGNCLASSIFY or raises the existing
+%           singleton*.
 %
-%      GUITRAFFICSIGNCLASSIFY('Property','Value',...) creates a new GUITRAFFICSIGNCLASSIFY or raises the
-%      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before guiTrafficSignClassify_OpeningFcn gets called.  An
-%      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to guiTrafficSignClassify_OpeningFcn via varargin.
+%           H = GUITRAFFICSIGNCLASSIFY returns the handle to a new GUITRAFFICSIGNCLASSIFY or the handle to
+%           the existing singleton*.
 %
-%      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
-%      instance to run (singleton)".
+%           GUITRAFFICSIGNCLASSIFY('CALLBACK',hObject,eventData,handles,...) calls the local
+%           function named CALLBACK in GUITRAFFICSIGNCLASSIFY.M with the given input arguments.
 %
-% See also: GUIDE, GUIDATA, GUIHANDLES
+%           GUITRAFFICSIGNCLASSIFY('Property','Value',...) creates a new GUITRAFFICSIGNCLASSIFY or raises the
+%           existing singleton*.  Starting from the left, property value pairs are
+%           applied to the GUI before guiTrafficSignClassify_OpeningFcn gets called.  An
+%           unrecognized property name or invalid value makes property application
+%           stop.  All inputs are passed to guiTrafficSignClassify_OpeningFcn via varargin.
+%
+%           *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
+%           instance to run (singleton)".
+%
+%       See also: GUIDE, GUIDATA, GUIHANDLES
+%
+%	Description for application implemented inside the GUI:
+%
+%       GUITRAFFICSIGNCLASSIFY implements a traffic sign classificator using
+%       Histogram of Oriented Gradients for characteristics extraction, 
+%       Principal Component Analysis for characteristics reduction and
+%       Gaussian Mixture Model for classification.
 
 % Edit the above text to modify the response to help guiTrafficSignClassify
 
@@ -43,6 +53,9 @@ else
 end
 % End initialization code - DO NOT EDIT
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Inicialización de las variables y componentes usados en el clasificador %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % --- Executes just before guiTrafficSignClassify is made visible.
 function guiTrafficSignClassify_OpeningFcn(hObject, eventdata, handles, varargin)
@@ -63,26 +76,25 @@ load('labels.mat')
 % imï¿½genes de la base de datos
 load('HOGFeatures.mat');
 load('clases.mat');
-Xtrain = caracteristicas;
+% Se asignan los datos importados a variables globales
+handles.Xtrain = Xtrain;
 handles.Ytrain = clases;
-handles.labels = labels
-handles.vectorPropio = vectorPropio
-handles.valorPropio = valorPropio
+handles.labels = labels;
+handles.vectorPropio = vectorPropio;
+handles.valorPropio = valorPropio;
 
 porcentaje = 0;
 x=0;
-% Con el mï¿½todo PCA se ordenan descendentemente las caracterï¿½sticas con
+% Con el método PCA se ordenan descendentemente las caracterï¿½sticas con
 % mayor peso, se establece un margen de 0.90 para tomar la caracterï¿½sticas
 % a ser usadas entre el total extraï¿½das por HOG
 while porcentaje<0.90
     x=x+1;
     porcentaje = porcentaje + (valorPropio(x)/sum(valorPropio));
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Se seleccionan las caracterï¿½sticas de las muestras de entrenamiento
 % y la que se quiere evaluar, correspondientes a las caracterï¿½sticas
 % seleccionadas por el cï¿½lculo en el valor propio
-handles.Xtrain = Xtrain*vectorPropio(:,1:x);
 handles.x=x;
 % Update handles structure
 guidata(hObject, handles);
@@ -100,40 +112,61 @@ function varargout = guiTrafficSignClassify_OutputFcn(hObject, eventdata, handle
 % Get default command line output from handles structure
 varargout{1} = handles.output;
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Realizar la clasificación de la imagen %%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% --- Executes on button press in classifyBtn.
+% --- Se ejecuta al presionar el botón Classify.
 function classifyBtn_Callback(hObject, eventdata, handles)
-% hObject    handle to classifyBtn (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 tic;
+% Se normalizan las muestras para evitar que haya polarizaciï¿½n en los
+% datos debido a la diferencia en los valores, tambiï¿½n se encuentran media
+% y desviaciï¿½n estï¿½ndar de los datos
 [Xtrain, mu, sigma] = zscore(handles.Xtrain);
 Xtest = (handles.Xtest-repmat(mu,size(handles.Xtest,1),1))./repmat(sigma,size(handles.Xtest,1),1);
+% Se entrena el modelo de predicciï¿½n como un modelo de mezclas gaussianas
+% utilizando los datos de las muestras de entrenamiento, y se muestra el
+% valor de la evaluaciï¿½n de la muestra que se quiere clasificar
 [classification] = classify(Xtest, Xtrain, handles.Ytrain, 'linear');
+% Se selecciona el nombre de la muestra según la clasificación hecha y se
+% muestra en la etiqueta correspondiente
 text = ['La señal de tránsito es: ',handles.labels{classification}];
 set(handles.classifyText,'String',text);
 disp(text);
+% Se elige cuál es la señal de tránsito del banco de imágenes de las
+% señales y se muestra en el lado derecho de la ventana
 text2 = ['./SampleSigns/',num2str(classification),'.png'];
 img2 = imread(text2);
 axes(handles.result_img);
 imshow(img2);
 toc;
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%% Seleccionar la imagen a ser clasificada %%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-% --- Executes on button press in importBtn.
+% --- Se ejecuta al proesionar el botón Import image.
 function importBtn_Callback(hObject, eventdata, handles)
 % hObject    handle to importBtn (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% Importar una imagen seleccionada por el usuario
 [filename, pathname]=uigetfile({'*.jpg;*.jpeg;*.jp2;*.jpf;*.jpx;*.j2c;*.j2k;*.ppm;*.png;*.bmp;*.tiff;*.tif;*.ico;*.pnm'},'Select An Image');
+% Obtener la ruta absoluta de la imagen
 fullPath = strcat(pathname,filename);
+% Importar la imagen como una variable
 img = imread(fullPath);
+% Redimensiï¿½n de la imagen
 img = imresize(img, [300 300]);
+% Establecer el marco donde estará ubicada la imagen a ser clasificada
 axes(handles.import_img);
 imshow(img);
+% Se extraen las características del histograma de vectores de soporte
 [Xsample, ~] = extractHOGFeatures(img);
+% Se extraen las características por PCA de la imagen a ser clasificada
 handles.Xtest = Xsample*handles.vectorPropio(:,1:handles.x);
-
+cla(handles.result_img,'reset');
+set(handles.classifyText,'String','');
+% Se exportan a la clase global los datos que resultan de esta función
 guidata(hObject, handles);

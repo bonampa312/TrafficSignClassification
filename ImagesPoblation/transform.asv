@@ -1,0 +1,42 @@
+%Transformaciones
+clear all; close all; clc
+imagen= imread('1-1.png');
+
+%Redimencionar imagen
+%Interpolado y diezmado
+a=imresize(imagen,4,'method','box');
+b=imresize(imagen,0.25,'method','box');
+c=imresize(b,16,'method','box'); %figure(3); imshow(c);
+j = 95;
+tform = maketform('affine',[1 0 0; 0 1 0; 0 0 1]);
+d = imtransform(c,tform);
+name = strcat('000',num2str(j));
+name = strcat(name,'.ppm');
+imwrite(d,name);
+j = j+1;
+for i=-0.1:-0.1:-0.3
+    tform1 = maketform('affine',[1 i 0; 0 1 0; 0 0 1]);
+    tform2 = maketform('affine',[1 -i 0; 0 1 0; 0 0 1]);
+    tform3 = maketform('affine',[1 0 0; i 1 0; 0 0 1]);
+    tform4 = maketform('affine',[1 0 0; -i 1 0; 0 0 1]);
+    d = imtransform(c,tform1);
+    name = strcat('000',num2str(j));
+    name = strcat(name,'.ppm');
+    imwrite(d,name);
+    j = j+1;
+    d = imtransform(c,tform2);
+    name = strcat('000',num2str(j));
+    name = strcat(name,'.ppm');
+    imwrite(d,name);
+    j = j+1;
+    d = imtransform(c,tform3);
+    name = strcat('000',num2str(j));
+    name = strcat(name,'.ppm');
+    imwrite(d,name);
+    j = j+1;
+    d = imtransform(c,tform4);
+    name = strcat('000',num2str(j));
+    name = strcat(name,'.ppm');
+    imwrite(d,name);
+    j = j+1;
+end
